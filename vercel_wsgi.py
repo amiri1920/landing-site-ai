@@ -5,7 +5,12 @@ def handler(request):
     from werkzeug.wrappers import Request, Response
 
     # Create a Werkzeug Request object from the Vercel request
-    req = Request.from_values(input_stream=request.body, content_length=len(request.body), method=request.method, headers=request.headers)
+    req = Request.from_values(
+        input_stream=request.body,
+        content_length=len(request.body),
+        method=request.method,
+        headers=request.headers
+    )
 
     # Use Flask's WSGI app to handle the request
     response = Response()
