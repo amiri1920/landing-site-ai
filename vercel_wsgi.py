@@ -1,15 +1,19 @@
 from app import app  # Import your Flask app instance
 
-def handler(request, response):
-    # Vercel expects a handler function that processes the request and returns a response
-    from wsgiref.handlers import CGIHandler
-    from io import StringIO
+def handler(request):
+    # Vercel expects a handler function that takes a request object and returns a response object
+    from werkzeug.wrappers import Request, Response
 
-    # Create a StringIO object for output
-    output = StringIO()
-    CGIHandler().run(app, {'wsgi.input': StringIO(request.body.decode('utf-8')), 'wsgi.errors': output})
+    # Create a Werkzeug Request object from the Vercel request
+    req = Request.from_values(input_stream=request.body, content_length=len(request.body), method=request.method, headers=request.headers)
 
-    # Return the response
-    response.status = 200
-    response.body = output.getvalue().encode('utf-8')
-    response.headers['Content-Type'] = 'text/html'
+    # Use Flask's WSGI app to handle the request
+    response = Response()
+    app(req.environ, response.start_response)
+
+    # Prepare the response for Vercel
+    return {
+        'statusCode': response.status_code,
+        'headers': dict(response.headers),
+        'body': response.get_data(as_text=False).decode('utf-8')
+    }
