@@ -1,24 +1,24 @@
-from app import app  # Import your Flask app instance
+from app import app  # Import your Flask app from app.py
+from werkzeug.wrappers import Request, Response
 
-def handler(request):
-    # Vercel expects a handler function that takes a request object and returns a response object
-    from werkzeug.wrappers import Request, Response
-
-    # Create a Werkzeug Request object from the Vercel request
-    req = Request.from_values(
-        input_stream=request.body,
-        content_length=len(request.body),
-        method=request.method,
-        headers=request.headers
-    )
-
-    # Use Flask's WSGI app to handle the request
+# Define the handler Vercel expects
+def handler(event, context):
+    # Convert Vercel's event into a WSGI-compatible request
+    request = Request(event)
+    
+    # Create a response object
     response = Response()
-    app(req.environ, response.start_response)
+    
+    # Pass the request to Flask and get the response
+    with app.request_context(request.environ):
+        wsgi_response = app.full_dispatch_request()
+        response.status_code = wsgi_response.status_code
+        response.headers = wsgi_response.headers
+        response.data = wsgi_response.get_data()
 
-    # Prepare the response for Vercel
+    # Return the response in Vercel’s expected format
     return {
-        'statusCode': response.status_code,
-        'headers': dict(response.headers),
-        'body': response.get_data(as_text=False).decode('utf-8')
+        "statusCode": response.status_code,
+        "headers": dict(response.headers),
+        "body": response.get_data(as_text=True)
     }
