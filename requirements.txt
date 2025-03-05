@@ -1,4 +1,4 @@
 Flask
 flask-cors
 requests
-git+https://github.com/siavashk/vercel-wsgi.git#egg=vercel-wsgi
+git+https://github.com/siavashk/vercel-wsgi.git@main#egg=vercel-wsgi
