@@ -1,10 +1,15 @@
 {
-  "functions": {
-    "api/vercel_wsgi.py": {
-      "runtime": "python3.9"
+  "version": 2,
+  "builds": [
+    {
+      "src": "vercel_wsgi.py",
+      "use": "@vercel/python"
     }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/vercel_wsgi.py" }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "vercel_wsgi.py"
+    }
   ]
 }
